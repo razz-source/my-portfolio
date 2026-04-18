@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import Hls from 'hls.js';
-import { ArrowUpRight } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 export default function CtaFooter() {
   const videoRef = useRef(null);
@@ -9,6 +9,19 @@ export default function CtaFooter() {
   const footerRef = useRef(null);
   const isContentInView = useInView(contentRef, { once: true, margin: "-100px" });
   const isFooterInView = useInView(footerRef, { once: true, margin: "-50px" });
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Handle form submission logic here
+    setIsSubmitted(true);
+    setTimeout(() => setIsSubmitted(false), 3000);
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   useEffect(() => {
     const video = videoRef.current;
@@ -83,22 +96,56 @@ export default function CtaFooter() {
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           className="text-white/60 font-body font-light text-sm md:text-base max-w-xl mb-8"
         >
-          Book a free strategy call. See what AI-powered design can do. No
+          Tell us about your project. See what AI-powered design can do. No
           commitment, no pressure. Just possibilities.
         </motion.p>
 
-        {/* Buttons */}
-        <motion.div
+        {/* Contact Form */}
+        <motion.form
+          onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 30 }}
           animate={isContentInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-          className="flex items-center gap-4 mb-16"
+          className="w-full max-w-md mb-16"
         >
-          <button className="liquid-glass-strong rounded-full px-6 py-3 flex items-center gap-2 text-white font-body text-sm hover:bg-white/5 transition-colors">
-            Book a Call
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
-        </motion.div>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="Your name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="w-full px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 font-body text-sm focus:outline-none focus:border-white/40 transition-colors"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 font-body text-sm focus:outline-none focus:border-white/40 transition-colors"
+            />
+            <textarea
+              name="message"
+              placeholder="Tell us about your project..."
+              value={formData.message}
+              onChange={handleChange}
+              required
+              rows={4}
+              className="w-full px-5 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder:text-white/50 font-body text-sm focus:outline-none focus:border-white/40 transition-colors resize-none"
+            />
+            <button
+              type="submit"
+              disabled={isSubmitted}
+              className="w-full liquid-glass-strong rounded-full px-6 py-3 flex items-center justify-center gap-2 text-white font-body text-sm hover:bg-white/5 transition-colors disabled:opacity-50"
+            >
+              {isSubmitted ? 'Message Sent!' : 'Send Message'}
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+        </motion.form>
 
         {/* Footer Bar */}
         <motion.div
