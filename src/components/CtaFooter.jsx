@@ -157,7 +157,7 @@ export default function CtaFooter() {
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <span className="text-white/40 text-xs font-body">
-              (c) 2026 Studio. All rights reserved.
+              (c) 2026 WeaveWebs. All rights reserved.
             </span>
             <div className="flex items-center gap-6">
               <a
