@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import Hls from 'hls.js';
 import { Send } from 'lucide-react';
+import { getSupabase } from '../lib/supabase';
 
 export default function CtaFooter() {
   const videoRef = useRef(null);
@@ -11,12 +12,54 @@ export default function CtaFooter() {
   const isFooterInView = useInView(footerRef, { once: true, margin: "-50px" });
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
+    console.log('Form submitted:', formData);
+    setIsSubmitting(true);
+    setIsSubmitted(false);
+    
+    try {
+      // Initialize Supabase client once
+      const supabase = getSupabase();
+      console.log('Supabase client ready');
+      
+      // Single insert operation with .select() to get confirmation
+      const { data, error: insertError } = await supabase
+        .from('contacts')
+        .insert([{ 
+          name: formData.name, 
+          email: formData.email, 
+          message: formData.message 
+        }])
+        .select();
+      
+      console.log('Supabase response:', { data, insertError });
+      
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        alert('Failed to send: ' + insertError.message);
+        return;
+      }
+      
+      // Only show success if we got data back
+      if (data && data.length > 0) {
+        console.log('Insert successful:', data);
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', message: '' });
+        setTimeout(() => setIsSubmitted(false), 3000);
+      } else {
+        console.warn('No data returned from insert');
+        alert('Message may not have been saved. Please try again.');
+      }
+      
+    } catch (err) {
+      console.error('Submit exception:', err);
+      alert('Error: ' + (err?.message || 'Failed to send message'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -138,10 +181,10 @@ export default function CtaFooter() {
             />
             <button
               type="submit"
-              disabled={isSubmitted}
+              disabled={isSubmitting || isSubmitted}
               className="w-full liquid-glass-strong rounded-full px-6 py-3 flex items-center justify-center gap-2 text-white font-body text-sm hover:bg-white/5 transition-colors disabled:opacity-50"
             >
-              {isSubmitted ? 'Message Sent!' : 'Send Message'}
+              {isSubmitting ? 'Sending...' : isSubmitted ? 'Message Sent!' : 'Send Message'}
               <Send className="w-4 h-4" />
             </button>
           </div>

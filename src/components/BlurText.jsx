@@ -6,6 +6,7 @@ export default function BlurText({
   delay = 100,
   direction = 'bottom',
   className = '',
+  // eslint-disable-next-line
   as: Component = 'h1',
 }) {
   const words = text.split(' ');
